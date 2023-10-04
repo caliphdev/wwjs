@@ -125,11 +125,7 @@ class Client extends EventEmitter {
             timeout: 0,
             referer: 'https://whatsapp.com/'
         });
-        await page.addScriptTag({
-            path: require.resolve('@wppconnect/wa-js')
-        })
         
-        await page.waitForFunction(() => window.WPP?.isReady)
 
         await page.evaluate(`function getElementByXpath(path) {
             return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
@@ -335,7 +331,9 @@ class Client extends EventEmitter {
 
         // Check window.Store Injection
         await page.waitForFunction('window.Store != undefined');
-
+        
+      
+        
         await page.evaluate(async () => {
             // safely unregister service workers
             const registrations = await navigator.serviceWorker.getRegistrations();
@@ -688,6 +686,10 @@ class Client extends EventEmitter {
                 }).bind(module);
             }
         });
+        await page.addScriptTag({
+            path: require.resolve('@wppconnect/wa-js')
+        })
+        await page.waitForFunction(() => window.WPP?.isReady)
 
         /**
          * Emitted when the client has initialized and is ready to receive messages.
