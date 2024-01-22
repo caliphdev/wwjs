@@ -364,6 +364,14 @@ exports.LoadUtils = () => {
         return window.Store.Msg.get(msg.id._serialized);
     };
 
+    window.WWebJS.pinUnpinMsgAction = async (msgId, action, duration) => {
+        const message = window.Store.Msg.get(msgId);
+        if (!message) return false;
+        const response = await window.Store.pinUnpinMsg(message, action, duration);
+        if (response.messageSendResult === 'OK') return true;
+        return false;
+    };
+
     window.WWebJS.toStickerData = async (mediaInfo) => {
         if (mediaInfo.mimetype == 'image/webp') return mediaInfo;
 
