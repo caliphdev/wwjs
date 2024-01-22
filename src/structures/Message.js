@@ -296,6 +296,18 @@ class Message extends Base {
         return this;
     }
 
+    async pin(duration) {
+        return await this.client.pupPage.evaluate(async (msgId, duration) => {
+            return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+        }, this.id._serialized, duration);
+    }
+
+    async unpin() {
+        return await this.client.pupPage.evaluate(async (msgId) => {
+            return await window.WWebJS.pinUnpinMsgAction(msgId, 2);
+        }, this.id._serialized);
+    }
+
     /**
      * Returns message in a raw format
      * @type {Object}
