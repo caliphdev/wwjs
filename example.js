@@ -140,6 +140,10 @@ client.on('message', async msg => {
             const attachmentData = await quotedMsg.downloadMedia();
             client.sendMessage(msg.from, attachmentData, { caption: 'Here\'s your requested media.' });
         }
+        if (quotedMsg.hasMedia && quotedMsg.type === 'audio') {
+            const audio = await quotedMsg.downloadMedia();
+            await client.sendMessage(msg.from, audio, { sendAudioAsVoice: true });
+        }
     } else if (msg.body === '!isviewonce' && msg.hasQuotedMsg) {
         const quotedMsg = await msg.getQuotedMessage();
         if (quotedMsg.hasMedia) {
@@ -147,7 +151,14 @@ client.on('message', async msg => {
             await client.sendMessage(msg.from, media, { isViewOnce: true });
         }
     } else if (msg.body === '!location') {
-        msg.reply(new Location(37.422, -122.084, 'Googleplex\nGoogle Headquarters'));
+        // only latitude and longitude
+        await msg.reply(new Location(37.422, -122.084));
+        // location with name only
+        await msg.reply(new Location(37.422, -122.084, { name: 'Googleplex' }));
+        // location with address only
+        await msg.reply(new Location(37.422, -122.084, { address: '1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA' }));
+        // location with name, address and url
+        await msg.reply(new Location(37.422, -122.084, { name: 'Googleplex', address: '1600 Amphitheatre Pkwy, Mountain View, CA 94043, USA', url: 'https://google.com' }));
     } else if (msg.location) {
         msg.reply(msg.location);
     } else if (msg.body.startsWith('!status ')) {

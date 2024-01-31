@@ -151,7 +151,21 @@ class Message extends Base {
          * Location information contained in the message, if the message is type "location"
          * @type {Location}
          */
-        this.location = data.type === MessageTypes.LOCATION ? new Location(data.lat, data.lng, data.loc) : undefined;
+        this.location = (() => {
+            if (data.type !== MessageTypes.LOCATION) {
+                return undefined;
+            }
+            let description;
+            if (data.loc && typeof data.loc === 'string') {
+                let splitted = data.loc.split('\n');
+                description = {
+                    name: splitted[0],
+                    address: splitted[1],
+                    url: data.clientUrl
+                };
+            }
+            return new Location(data.lat, data.lng, description);
+        })();
 
         /**
          * List of vCards contained in the message.
@@ -168,8 +182,8 @@ class Message extends Base {
             inviteCodeExp: data.inviteCodeExp,
             groupId: data.inviteGrp,
             groupName: data.inviteGrpName,
-            fromId: data.from?._serialized ? data.from._serialized : data.from,
-            toId: data.to?._serialized ? data.to._serialized : data.to
+            fromId: '_serialized' in data.from ? data.from._serialized : data.from,
+            toId: '_serialized' in data.to ? data.to._serialized : data.to
         } : undefined;
 
         /**
@@ -280,6 +294,18 @@ class Message extends Base {
         
         this._patch(newData);
         return this;
+    }
+
+    async pin(duration) {
+        return await this.client.pupPage.evaluate(async (msgId, duration) => {
+            return await window.WWebJS.pinUnpinMsgAction(msgId, 1, duration);
+        }, this.id._serialized, duration);
+    }
+
+    async unpin() {
+        return await this.client.pupPage.evaluate(async (msgId) => {
+            return await window.WWebJS.pinUnpinMsgAction(msgId, 2);
+        }, this.id._serialized);
     }
 
     /**
